@@ -34,9 +34,9 @@ def main():
     headers['Referer'] = args.referer
     req_body = {
         'gift_id': args.gift_id,
-        'num': 10,
+        'num': args.size,
         'live_id': args.live_id,
-        'csrf_token': args.token,,
+        'csrf_token': args.token,
         'isRemovable': True
     }
     req_url = base_url + (gift_point_url if args.gift_type == 'point' else gift_free_url)
