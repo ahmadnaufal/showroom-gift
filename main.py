@@ -46,8 +46,9 @@ def is_free_gift(gift_id: int) -> bool:
 
 def parse_response(response: requests.Response):
     parsed_resp = response.json()
-    if parsed_resp['errors']:
-        print("Error: [%d] %s" % (parsed_resp['errors'][0]['code'], parsed_resp['errors'][0]['message']))
+    if 'errors' in parsed_resp: # error sign
+        err_obj = parsed_resp['errors'][0]
+        print("Error: [%d] %s: %s" % (err_obj['code'], err_obj['message'], err_obj['error_user_msg']))
     else:
         print(parsed_resp)
 
