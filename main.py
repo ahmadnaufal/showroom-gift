@@ -6,6 +6,11 @@ base_url = "https://www.showroom-live.com/api/live"
 gift_free_url = "/gifting_free"
 gift_point_url = "/gifting_point_use"
 
+# seeds: seedA, seedB, seedC, seedB, seedE
+seed_ids = [1501, 1502, 1503, 1504, 1505]
+# stars: starA, starB, starC, starD, starE
+star_ids = [1, 1001, 1002, 1003, 2]
+
 header_template = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
     "Accept": "*/*",
@@ -17,9 +22,33 @@ header_template = {
     "Cookie": "<insert-cookie-here>"
 }
 
+def build_request_props(args):
+    # build headers
+    headers = header_template
+    headers['Referer'] = args.referer
+
+    # build request body
+    body = {
+        'gift_id': args.gift_id,
+        'num': args.size,
+        'live_id': args.live_id,
+        'csrf_token': args.token,
+        'isRemovable': True
+    }
+
+    # build url
+    url = base_url + (gift_free_url if is_free_gift(args.gift_id) else gift_point_url)
+
+    return url, headers, body
+
+def is_free_gift(gift_id):
+    return gift_id in (seed_ids + star_ids)
+
+def parse_response(r):
+    print(r.text)
+
 def main():
     parser = argparse.ArgumentParser(description='Gifting showroom for some period of time')
-    parser.add_argument('gift_type', help='Gift type (free/point)')
     parser.add_argument('live_id', type=int, help='Showroom Live ID')
     parser.add_argument('--gift-id', dest='gift_id', type=int, default=1, help='Gift ID')
     parser.add_argument('--referer', type=str, default="https://www.showroom-live.com", help='Referer to put to header')
@@ -29,25 +58,17 @@ def main():
     parser.add_argument('--token', type=str, help='CSRF Token provided')
 
     args = parser.parse_args()
-    #build request
-    headers = header_template
-    headers['Referer'] = args.referer
-    req_body = {
-        'gift_id': args.gift_id,
-        'num': args.size,
-        'live_id': args.live_id,
-        'csrf_token': args.token,
-        'isRemovable': True
-    }
-    req_url = base_url + (gift_point_url if args.gift_type == 'point' else gift_free_url)
+
+    url, headers, body = build_request_props(args)
 
     i = 0
     while i < args.n:
-        r = requests.post(req_url, data=req_body, headers=headers)
-        print(r.text)
         # do request
+        r = requests.post(url, data=body, headers=headers)
+        parse_response(r)
         time.sleep(args.delay)
         i += 1
+
 
 if __name__ == '__main__':
     main()
