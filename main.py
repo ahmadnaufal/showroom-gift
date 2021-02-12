@@ -22,7 +22,7 @@ header_template = {
     "Cookie": "<insert-cookie-here>"
 }
 
-def build_request_props(args):
+def build_request_props(args) -> (str, dict, dict):
     # build headers
     headers = header_template
     headers['Referer'] = args.referer
@@ -41,11 +41,15 @@ def build_request_props(args):
 
     return url, headers, body
 
-def is_free_gift(gift_id):
+def is_free_gift(gift_id: int) -> bool:
     return gift_id in (seed_ids + star_ids)
 
-def parse_response(r):
-    print(r.text)
+def parse_response(response: requests.Response):
+    parsed_resp = response.json()
+    if parsed_resp['errors']:
+        print("Error: [%d] %s" % (parsed_resp['errors'][0]['code'], parsed_resp['errors'][0]['message']))
+    else:
+        print(parsed_resp)
 
 def main():
     parser = argparse.ArgumentParser(description='Gifting showroom for some period of time')
